@@ -1,6 +1,7 @@
 import streamlit as st
 from documents import documents_page
 from chat import chat_page
+from login import login_page
 
 # Define the pages of the app
 PAGES = {
@@ -11,14 +12,23 @@ PAGES = {
 
 def main():
     """Main function to run the Streamlit app."""
-    # Dummy user data
-    user_name = "John Doe"
-    user_roles = ["Admin", "Editor"]
+    
+    # Check if the user is logged in
+    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+        login_page()
+        return
 
-    # Display the user info in the sidebar
+    # Display user info in the sidebar
     st.sidebar.title("Navigation")
-    st.sidebar.write(f"**Logged in as:** {user_name}")
-    st.sidebar.write(f"**Roles:** {', '.join(user_roles)}")
+    st.sidebar.write(f"**Logged in as:** {st.session_state.user_name}")
+    st.sidebar.write(f"**Roles:** {', '.join(st.session_state.user_roles)}")
+    
+    # Add a logout option
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user_name = None
+        st.session_state.user_roles = None
+        st.rerun()  # Redirect to login page
 
     # Navigation options
     selection = st.sidebar.radio("Go to", list(PAGES.keys()))
