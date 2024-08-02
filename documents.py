@@ -2,19 +2,23 @@ import streamlit as st
 
 def documents_page():
     """Display the documents page with a list of shared and private document icons and upload functionality."""
-    # st.title("Documents")
+    st.title("Documents")
 
-    # Example list of dummy documents with categories
+    # Example list of dummy documents with categories and summaries
     shared_docs = [
-        {"name": "Shared Document 1", "icon": "📄"},
-        {"name": "Shared Document 2", "icon": "📄"}
+        {"name": "Shared Document 1", "icon": "pdf_icon.png", "summary": "Summary of Shared Document 1."},
+        {"name": "Shared Document 2", "icon": "pdf_icon.png", "summary": "Summary of Shared Document 2."}
     ]
 
     private_docs = [
-        {"name": "Private Document 1", "icon": "📄"},
-        {"name": "Private Document 2", "icon": "📄"},
-        {"name": "Private Document 3", "icon": "📄"}
+        {"name": "Private Document 1", "icon": "pdf_icon.png", "summary": "Summary of Private Document 1."},
+        {"name": "Private Document 2", "icon": "pdf_icon.png", "summary": "Summary of Private Document 2."},
+        {"name": "Private Document 3", "icon": "pdf_icon.png", "summary": "Summary of Private Document 3."}
     ]
+
+    # Initialize session state if not already
+    if 'selected_summary' not in st.session_state:
+        st.session_state.selected_summary = None
 
     # Layout for displaying documents side by side
     col1, col2 = st.columns(2)
@@ -24,14 +28,37 @@ def documents_page():
         for doc in shared_docs:
             doc_name = doc["name"]
             doc_icon = doc["icon"]
-            st.write(f"{doc_icon} {doc_name}")
+            doc_summary = doc["summary"]
+            # Create two columns for icon and text
+            icon_col, text_col = st.columns([1, 4])
+            with icon_col:
+                st.image(doc_icon, width=30)
+            with text_col:
+                st.write(doc_name)
+                # Show summary button
+                if st.button(f"Show Summary for {doc_name}", key=f"show_summary_{doc_name}"):
+                    st.session_state.selected_summary = doc_summary
 
     with col2:
         st.subheader("Private Documents")
         for doc in private_docs:
             doc_name = doc["name"]
             doc_icon = doc["icon"]
-            st.write(f"{doc_icon} {doc_name}")
+            doc_summary = doc["summary"]
+            # Create two columns for icon and text
+            icon_col, text_col = st.columns([1, 4])
+            with icon_col:
+                st.image(doc_icon, width=30)
+            with text_col:
+                st.write(doc_name)
+                # Show summary button
+                if st.button(f"Show Summary for {doc_name}", key=f"show_summary_{doc_name}"):
+                    st.session_state.selected_summary = doc_summary
+
+    # Display the selected summary
+    if st.session_state.selected_summary:
+        st.subheader("Document Summary")
+        st.write(st.session_state.selected_summary)
 
     # Horizontal separator
     st.markdown("---")
