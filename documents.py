@@ -19,6 +19,7 @@ def documents_page():
     # Initialize session state if not already
     if 'selected_summary' not in st.session_state:
         st.session_state.selected_summary = None
+        st.session_state.selected_doc = None
 
     # Layout for displaying documents side by side
     col1, col2 = st.columns(2)
@@ -34,9 +35,9 @@ def documents_page():
             with icon_col:
                 st.image(doc_icon, width=30)
             with text_col:
-                st.write(doc_name)
-                # Show summary button
-                if st.button(f"Show Summary for {doc_name}", key=f"show_summary_{doc_name}"):
+                # Clickable text for showing summary
+                if st.button(f"{doc_name}", key=f"show_summary_shared_{doc_name}"):
+                    st.session_state.selected_doc = doc_name
                     st.session_state.selected_summary = doc_summary
 
     with col2:
@@ -50,22 +51,24 @@ def documents_page():
             with icon_col:
                 st.image(doc_icon, width=30)
             with text_col:
-                st.write(doc_name)
-                # Show summary button
-                if st.button(f"Show Summary for {doc_name}", key=f"show_summary_{doc_name}"):
+                # Clickable text for showing summary
+                if st.button(f"{doc_name}", key=f"show_summary_private_{doc_name}"):
+                    st.session_state.selected_doc = doc_name
                     st.session_state.selected_summary = doc_summary
 
-    # Display the selected summary
+    # Display the selected summary section above the upload section
+    st.subheader("Document Summary")
     if st.session_state.selected_summary:
-        st.subheader("Document Summary")
+        st.write(f"**{st.session_state.selected_doc}**")
         st.write(st.session_state.selected_summary)
+    else:
+        st.write("Select a document to see the summary.")
 
     # Horizontal separator
     st.markdown("---")
 
     # Upload Section
     st.subheader("Upload a Document")
-    st.markdown("### Upload Document")
         
     # File uploader (only PDF supported)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
@@ -82,11 +85,7 @@ def documents_page():
             # You can add logic to save the file and roles information
         else:
             st.error("Please select a file and assign at least one role.")
-        
-    if st.button("Cancel"):
-        # Clear the file uploader and role selection (simulating form reset)
-        st.caching.clear_cache()
-        st.experimental_rerun()
+
 
 # Example to display the documents page
 if __name__ == "__main__":
