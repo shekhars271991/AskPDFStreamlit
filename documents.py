@@ -18,6 +18,7 @@ def documents_page():
 
     # API details
     api_url = "http://127.0.0.1:5000/api/documents"
+    upload_url = "http://127.0.0.1:5000/api/upload"
     headers = {
         "Authorization": f"Bearer {st.session_state.access_token}"
     }
@@ -85,10 +86,9 @@ def documents_page():
     # File uploader (only PDF supported)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
     
-    
     # Select roles (example roles)
-    roles = ["admin", "partner", "user", "team1"]
-    if "Admin" in st.session_state.user_roles:
+    roles = ["admin", "partner", "user", "team1", "private"]
+    if "admin" in st.session_state.user_roles:
         selected_roles = st.multiselect("Assign Roles", roles)
     else:
         selected_roles = st.session_state.user_name
@@ -96,9 +96,18 @@ def documents_page():
     # Submit and Cancel buttons
     if st.button("Submit"):
         if uploaded_file is not None and selected_roles:
-            # Process the file and roles here
-            st.success(f"File '{uploaded_file.name}' uploaded successfully with roles: {', '.join(selected_roles)}")
-            # You can add logic to save the file and roles information
+            # Prepare file and roles for API request
+            if(selected_roles == 'private'):
+                selected_roles = st.session_state.user_name
+            files = {'file': (uploaded_file.name, uploaded_file, 'application/pdf')}
+            data = {'roles': ','.join(selected_roles)}
+
+            try:
+                response = requests.post(upload_url, headers=headers, files=files, data=data)
+                response.raise_for_status()
+                st.success(f"Uploaded: '{uploaded_file.name}'")
+            except requests.exceptions.RequestException as e:
+                st.error(f"Failed to upload file: {e}")
         else:
             st.error("Please select a file and assign at least one role.")
 
