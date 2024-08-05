@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 def login_page():
     """Display the login page."""
@@ -12,6 +13,7 @@ def login_page():
             st.session_state.logged_in = False
             st.session_state.user_name = None
             st.session_state.user_roles = None
+            st.session_state.access_token = None
             st.success("Logged out successfully!")
             st.experimental_rerun()  # Redirect to login page
     else:
@@ -20,16 +22,27 @@ def login_page():
         password = st.text_input("Password", type="password")
         
         if st.button("Login"):
-            # Dummy authentication logic
-            if username == "user" and password == "password":
-                # Save login state
-                st.session_state.logged_in = True
-                st.session_state.user_name = username
-                st.session_state.user_roles = ["Admin"]  # Example roles
-                st.success("Login successful!")
-                st.rerun()  # Redirect to main app
-            else:
-                st.error("Invalid username or password.")
+            # API login request
+            login_url = "http://127.0.0.1:5000/auth/login"
+            payload = {"username": username, "password": password}
+            try:
+                response = requests.post(login_url, json=payload)
+                response.raise_for_status()  # Raise an error for bad responses
+                data = response.json()
+                access_token = data.get("access_token")
+
+                if access_token:
+                    # Save login state
+                    st.session_state.logged_in = True
+                    st.session_state.user_name = username
+                    st.session_state.user_roles = ["Admin"]  # Example roles
+                    st.session_state.access_token = access_token
+                    st.success("Login successful!")
+                    st.rerun()  # Redirect to main app
+                else:
+                    st.error("Login failed. No access token received.")
+            except requests.RequestException as e:
+                st.error(f"Login failed: {e}")
 
 # Example to display the login page
 if __name__ == "__main__":
