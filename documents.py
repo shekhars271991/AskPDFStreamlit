@@ -16,6 +16,10 @@ def documents_page():
         st.session_state.selected_summary = None
         st.session_state.selected_doc = None
 
+    # Initialize upload status
+    if 'upload_in_progress' not in st.session_state:
+        st.session_state.upload_in_progress = False
+
     # API details
     api_url = "http://127.0.0.1:5000/api/documents"
     upload_url = "http://127.0.0.1:5000/api/upload"
@@ -36,6 +40,8 @@ def documents_page():
     shared_docs = [doc for doc in documents if "admin" in doc["roles"]]
     private_docs = [doc for doc in documents if "pri" in doc["roles"]]
 
+    shared_docs = [doc for doc in documents if st.session_state.user_name not in doc["roles"]]
+    private_docs = [doc for doc in documents if st.session_state.user_name in doc["roles"]]
     # Layout for displaying documents side by side
     col1, col2 = st.columns(2)
 
@@ -87,27 +93,35 @@ def documents_page():
     uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
     
     # Select roles (example roles)
-    roles = ["admin", "partner", "user", "team1", "private"]
+    roles = ["admin", "partner", "user", "staff", "private"]
     if "admin" in st.session_state.user_roles:
         selected_roles = st.multiselect("Assign Roles", roles)
+        if "private" in selected_roles:
+            selected_roles = [st.session_state.user_name]
     else:
-        selected_roles = st.session_state.user_name
+        selected_roles = [st.session_state.user_name]
     
     # Submit and Cancel buttons
-    if st.button("Submit"):
+    if st.button("Submit", disabled=st.session_state.upload_in_progress):
         if uploaded_file is not None and selected_roles:
+            # Set upload status
+            st.session_state.upload_in_progress = True
+            
             # Prepare file and roles for API request
-            if(selected_roles == 'private'):
-                selected_roles = st.session_state.user_name
             files = {'file': (uploaded_file.name, uploaded_file, 'application/pdf')}
             data = {'roles': ','.join(selected_roles)}
 
             try:
                 response = requests.post(upload_url, headers=headers, files=files, data=data)
                 response.raise_for_status()
-                st.success(f"Uploaded: '{uploaded_file.name}'")
+                st.success(f"File '{uploaded_file.name}' uploaded successfully with roles: {', '.join(selected_roles)}")
+                # Reset the form
+                st.session_state.upload_in_progress = False
+                st.session_state.selected_roles = []
+                st.session_state.uploaded_file = None
             except requests.exceptions.RequestException as e:
                 st.error(f"Failed to upload file: {e}")
+                st.session_state.upload_in_progress = False
         else:
             st.error("Please select a file and assign at least one role.")
 
