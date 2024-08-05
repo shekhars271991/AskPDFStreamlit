@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 
 def chat_page():
     """Display the chat page for interacting with documents."""
@@ -21,20 +22,30 @@ def chat_page():
 
     if st.button("Send"):
         if user_input:
-            # Process user input here
-            st.write(f"You asked: {user_input}")
 
-            # Example response based on selected document types and cache setting (dummy logic)
-            if skip_cache_checkbox:
-                st.write("Skipping cache for this query.")
-                
-            if shared_docs_checkbox and private_docs_checkbox:
-                st.write("Response: This is a dummy response based on both shared and private documents.")
-            elif shared_docs_checkbox:
-                st.write("Response: This is a dummy response based on shared documents.")
-            elif private_docs_checkbox:
-                st.write("Response: This is a dummy response based on private documents.")
-            else:
-                st.write("Response: No document types selected.")
+            # Prepare API request
+            headers = {
+                "Authorization": f"Bearer {st.session_state.access_token}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "query": user_input
+            }
+
+            # Set skip_cache in the query parameters based on the checkbox state
+            skip_cache = "yes" if skip_cache_checkbox else "no"
+            api_url = f"http://127.0.0.1:5000/api/ask?skip_cache={skip_cache}"
+
+            # Make the API request
+            try:
+                response = requests.post(api_url, json=payload, headers=headers)
+                response_data = response.json()
+
+                # Display the response
+                # if response_data.get('relatedDocs'):
+                #     st.write(f"Related documents: {response_data.get('relatedDocs')}")
+                st.write(f"Response: {response_data.get('answer', 'No response from API.')}")
+            except Exception as e:
+                st.error(f"An error occurred: {e}")
         else:
             st.error("Please enter a message or query.")
