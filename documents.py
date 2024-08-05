@@ -1,25 +1,39 @@
 import streamlit as st
+import requests
 
 def documents_page():
     """Display the documents page with a list of shared and private document icons and upload functionality."""
     st.title("Documents")
 
-    # Example list of dummy documents with categories and summaries
-    shared_docs = [
-        {"name": "Shared Document 1", "icon": "pdf_icon.png", "summary": "Summary of Shared Document 1."},
-        {"name": "Shared Document 2", "icon": "pdf_icon.png", "summary": "Summary of Shared Document 2."}
-    ]
-
-    private_docs = [
-        {"name": "Private Document 1", "icon": "pdf_icon.png", "summary": "Summary of Private Document 1."},
-        {"name": "Private Document 2", "icon": "pdf_icon.png", "summary": "Summary of Private Document 2."},
-        {"name": "Private Document 3", "icon": "pdf_icon.png", "summary": "Summary of Private Document 3."}
-    ]
+    # Check if the user is logged in
+    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+        st.warning("You need to be logged in to view this page.")
+        st.button("Go to Login Page", on_click=lambda: st.experimental_rerun())
+        return
 
     # Initialize session state if not already
     if 'selected_summary' not in st.session_state:
         st.session_state.selected_summary = None
         st.session_state.selected_doc = None
+
+    # API details
+    api_url = "http://127.0.0.1:5000/api/documents"
+    headers = {
+        "Authorization": f"Bearer {st.session_state.access_token}"
+    }
+
+    # Fetch documents from API
+    try:
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()
+        documents = response.json()["documents"]
+    except requests.exceptions.RequestException as e:
+        st.error(f"Failed to fetch documents: {e}")
+        documents = []
+
+    # Separate documents into shared and private
+    shared_docs = [doc for doc in documents if "admin" in doc["roles"]]
+    private_docs = [doc for doc in documents if "pri" in doc["roles"]]
 
     # Layout for displaying documents side by side
     col1, col2 = st.columns(2)
@@ -27,32 +41,30 @@ def documents_page():
     with col1:
         st.subheader("Shared Documents")
         for doc in shared_docs:
-            doc_name = doc["name"]
-            doc_icon = doc["icon"]
+            doc_name = doc["doc_name"]
             doc_summary = doc["summary"]
             # Create two columns for icon and text
             icon_col, text_col = st.columns([1, 4])
             with icon_col:
-                st.image(doc_icon, width=30)
+                st.image("pdf_icon.png", width=30)
             with text_col:
                 # Clickable text for showing summary
-                if st.button(f"{doc_name}", key=f"show_summary_shared_{doc_name}"):
+                if st.button(f"{doc_name}", key=f"show_summary_shared_{doc['id']}"):
                     st.session_state.selected_doc = doc_name
                     st.session_state.selected_summary = doc_summary
 
     with col2:
         st.subheader("Private Documents")
         for doc in private_docs:
-            doc_name = doc["name"]
-            doc_icon = doc["icon"]
+            doc_name = doc["doc_name"]
             doc_summary = doc["summary"]
             # Create two columns for icon and text
             icon_col, text_col = st.columns([1, 4])
             with icon_col:
-                st.image(doc_icon, width=30)
+                st.image("pdf_icon.png", width=30)
             with text_col:
                 # Clickable text for showing summary
-                if st.button(f"{doc_name}", key=f"show_summary_private_{doc_name}"):
+                if st.button(f"{doc_name}", key=f"show_summary_private_{doc['id']}"):
                     st.session_state.selected_doc = doc_name
                     st.session_state.selected_summary = doc_summary
 
@@ -69,14 +81,18 @@ def documents_page():
 
     # Upload Section
     st.subheader("Upload a Document")
-        
+    
     # File uploader (only PDF supported)
     uploaded_file = st.file_uploader("Choose a file", type=["pdf"])
-        
+    
+    
     # Select roles (example roles)
-    roles = ["Admin", "Editor", "Viewer"]
-    selected_roles = st.multiselect("Assign Roles", roles)
-        
+    roles = ["admin", "partner", "user", "team1"]
+    if "Admin" in st.session_state.user_roles:
+        selected_roles = st.multiselect("Assign Roles", roles)
+    else:
+        selected_roles = st.session_state.user_name
+    
     # Submit and Cancel buttons
     if st.button("Submit"):
         if uploaded_file is not None and selected_roles:
@@ -85,7 +101,6 @@ def documents_page():
             # You can add logic to save the file and roles information
         else:
             st.error("Please select a file and assign at least one role.")
-
 
 # Example to display the documents page
 if __name__ == "__main__":

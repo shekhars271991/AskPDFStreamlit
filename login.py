@@ -30,12 +30,13 @@ def login_page():
                 response.raise_for_status()  # Raise an error for bad responses
                 data = response.json()
                 access_token = data.get("access_token")
+                roles = data.get("roles", [])
 
                 if access_token:
                     # Save login state
                     st.session_state.logged_in = True
                     st.session_state.user_name = username
-                    st.session_state.user_roles = ["Admin"]  # Example roles
+                    st.session_state.user_roles = roles 
                     st.session_state.access_token = access_token
                     st.success("Login successful!")
                     st.rerun()  # Redirect to main app
