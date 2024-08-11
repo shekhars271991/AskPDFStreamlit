@@ -13,27 +13,27 @@ PAGES = {
 def main():
     """Main function to run the Streamlit app."""
     
-    # Check if the user is logged in
-    if 'logged_in' not in st.session_state or not st.session_state.logged_in:
+    # Ensure the user is logged in before accessing any page
+    if not st.session_state.get('logged_in', False):
         login_page()
         return
 
-    # Display user info in the sidebar
-    st.sidebar.title("Navigation")
-    st.sidebar.write(f"**Logged in as:** {st.session_state.user_name}")
-    st.sidebar.write(f"**Roles:** {', '.join(st.session_state.user_roles)}")
-    
-    # Add a logout option
-    if st.sidebar.button("Logout"):
-        st.session_state.logged_in = False
-        st.session_state.user_name = None
-        st.session_state.user_roles = None
-        st.rerun()  # Redirect to login page
+    # Sidebar navigation and user information display
+    with st.sidebar:
+        st.title("Navigation")
+        st.write(f"**Logged in as:** {st.session_state.get('user_name', 'Guest')}")
+        st.write(f"**Roles:** {', '.join(st.session_state.get('user_roles', []))}")
+        
+        # Logout button
+        if st.button("Logout"):
+            # Clear session state for logout
+            st.session_state.clear()
+            st.experimental_rerun()  # Redirect to login page after logout
 
-    # Navigation options
-    selection = st.sidebar.radio("Go to", list(PAGES.keys()))
+        # Navigation options
+        selection = st.radio("Go to", list(PAGES.keys()))
 
-    # Display the selected page
+    # Display the selected page's content
     page = PAGES[selection]
     page()
 
