@@ -109,7 +109,7 @@ def upload_document_section(upload_url, headers):
             try:
                 response = requests.post(upload_url, headers=headers, files=files, data=data)
                 response.raise_for_status()
-                st.success(f"File '{uploaded_file.name}' uploaded successfully with roles: {', '.join(selected_roles)}")
+                st.success(f"File '{uploaded_file.name}' queued for upload with  roles: {', '.join(selected_roles)}")
                 # Reset the form
                 st.session_state.upload_in_progress = False
                 st.session_state.selected_roles = []
