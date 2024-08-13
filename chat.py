@@ -19,7 +19,7 @@ def chat_page():
 
     # Text area for user input
     st.markdown("<h4 style='margin-top: 30px;'>Enter your message or query:</h4>", unsafe_allow_html=True)
-    user_input = st.text_area("", placeholder="Type your query here...")
+    user_input = st.text_area("Your query", placeholder="Type your query here...", label_visibility="hidden")
 
     # Display selected options (optional, can be removed if not needed)
     st.write(f"**Selected Options:** {'Shared Documents' if shared_docs_checkbox else ''} {'Private Documents' if private_docs_checkbox else ''}")

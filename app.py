@@ -28,7 +28,7 @@ def main():
         if st.button("Logout"):
             # Clear session state for logout
             st.session_state.clear()
-            st.experimental_rerun()  # Redirect to login page after logout
+            st.rerun()  # Redirect to login page after logout
 
         # Navigation options
         selection = st.radio("Go to", list(PAGES.keys()))

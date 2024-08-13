@@ -13,7 +13,7 @@ def login_page():
         if st.button("Logout", key="logout_button", type="primary"):
             st.session_state.clear()  # Clear session state on logout
             st.success("Logged out successfully!")
-            st.experimental_rerun()
+            st.rerun()
     else:
         # Login form container
         with st.form(key='login_form'):
@@ -43,7 +43,7 @@ def login_page():
                         st.session_state.user_roles = roles 
                         st.session_state.access_token = access_token
                         st.success("Login successful!")
-                        st.experimental_rerun()  # Redirect to the main app
+                        st.rerun()  # Redirect to the main app
                     else:
                         st.error("Login failed. No access token received.")
                 except requests.RequestException as e:

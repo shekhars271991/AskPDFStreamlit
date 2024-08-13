@@ -8,7 +8,7 @@ def documents_page():
     # Ensure the user is logged in before accessing the page
     if not st.session_state.get('logged_in', False):
         st.warning("You need to be logged in to view this page.")
-        st.button("Go to Login Page", on_click=lambda: st.experimental_rerun())
+        st.button("Go to Login Page", on_click=lambda: st.rerun())
         return
 
     # Initialize session state if not already
