@@ -43,23 +43,17 @@ def chat_page():
                 response.raise_for_status()
                 response_data = response.json()
 
-                # Display related documents if any
-                related_docs = response_data.get('relatedDocs', [])
-                if related_docs:
-                    st.subheader("Related Documents")
-                    for doc_id, roles in related_docs:
-                        doc_name, doc_summary = get_document_details(doc_id)
-                        if doc_name:
-                            display_document_in_chat(doc_name, doc_summary)
-                        else:
-                            st.write(f"- Unknown Document (Roles: {', '.join(roles)})")
+                # Check if the response came from cache
+                from_cache = response_data.get("fromCache", False)
 
-                # Display the response
-                st.markdown("<hr style='margin-top: 40px;'>", unsafe_allow_html=True)
-                st.subheader("Response")
-                st.write(response_data.get('answer', 'No response from API.'))
+                # Display a cache indicator if the response is from cache
+                if from_cache:
+                    st.info("This response is from cache. Check the Skip Cache checkbox to search deeper.")
 
-                
+                # Display the related documents and response
+                display_related_documents(response_data)
+                display_response(response_data)
+
             except requests.exceptions.RequestException as e:
                 st.error(f"An error occurred: {e}")
         else:
@@ -74,11 +68,31 @@ def get_document_details(doc_id):
     return None, None
 
 
+def display_related_documents(response_data):
+    """Helper function to display related documents."""
+    related_docs = response_data.get('relatedDocs', [])
+    if related_docs:
+        st.subheader("Related Documents")
+        for doc_id, roles in related_docs:
+            doc_name, doc_summary = get_document_details(doc_id)
+            if doc_name:
+                display_document_in_chat(doc_name, doc_summary)
+            else:
+                st.write(f"- Unknown Document (Roles: {', '.join(roles)})")
+
+
 def display_document_in_chat(doc_name, doc_summary):
     """Helper function to display a document with clickable summary in chat."""
     with st.expander(doc_name):
         st.write(f"**Summary for {doc_name}:**")
         st.write(doc_summary)
+
+
+def display_response(response_data):
+    """Helper function to display the response from the chat API."""
+    st.markdown("<hr style='margin-top: 40px;'>", unsafe_allow_html=True)
+    st.subheader("Response")
+    st.write(response_data.get('answer', 'No response from API.'))
 
 
 if __name__ == "__main__":
