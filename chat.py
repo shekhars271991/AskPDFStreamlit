@@ -21,10 +21,6 @@ def chat_page():
     st.markdown("<h4 style='margin-top: 30px;'>Enter your message or query:</h4>", unsafe_allow_html=True)
     user_input = st.text_area("Your query", placeholder="Type your query here...", label_visibility="hidden")
 
-    # Display selected options (optional, can be removed if not needed)
-    st.write(f"**Selected Options:** {'Shared Documents' if shared_docs_checkbox else ''} {'Private Documents' if private_docs_checkbox else ''}")
-    st.write(f"**Cache Skipping:** {'Enabled' if skip_cache_checkbox else 'Disabled'}")
-
     # Send button with conditional input check
     if st.button("Send", type="primary"):
         if user_input.strip():
@@ -44,17 +40,46 @@ def chat_page():
             # Make the API request
             try:
                 response = requests.post(api_url, json=payload, headers=headers)
-                response.raise_for_status()  # Raise an error for bad responses
+                response.raise_for_status()
                 response_data = response.json()
+
+                # Display related documents if any
+                related_docs = response_data.get('relatedDocs', [])
+                if related_docs:
+                    st.subheader("Related Documents")
+                    for doc_id, roles in related_docs:
+                        doc_name, doc_summary = get_document_details(doc_id)
+                        if doc_name:
+                            display_document_in_chat(doc_name, doc_summary)
+                        else:
+                            st.write(f"- Unknown Document (Roles: {', '.join(roles)})")
 
                 # Display the response
                 st.markdown("<hr style='margin-top: 40px;'>", unsafe_allow_html=True)
                 st.subheader("Response")
                 st.write(response_data.get('answer', 'No response from API.'))
+
+                
             except requests.exceptions.RequestException as e:
                 st.error(f"An error occurred: {e}")
         else:
             st.error("Please enter a message or query.")
+
+
+def get_document_details(doc_id):
+    """Helper function to get document name and summary based on doc_id."""
+    for doc in st.session_state.get('documents', []):
+        if doc["id"] == f"file_{doc_id}_metadata":
+            return doc["doc_name"], doc["summary"]
+    return None, None
+
+
+def display_document_in_chat(doc_name, doc_summary):
+    """Helper function to display a document with clickable summary in chat."""
+    with st.expander(doc_name):
+        st.write(f"**Summary for {doc_name}:**")
+        st.write(doc_summary)
+
 
 if __name__ == "__main__":
     chat_page()
