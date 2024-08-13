@@ -4,6 +4,7 @@
 *.pyc
 __pycache__/
 
+
 # Ignore environment variables
 .env
 
@@ -11,6 +12,7 @@ __pycache__/
 build/
 dist/
 myenv/
+venv/
 
 # Ignore temporary files
 *.log
