@@ -2,11 +2,13 @@ import streamlit as st
 from documents import documents_page
 from chat import chat_page
 from login import login_page
+from webpages import url_indexing_page
 
 # Define the pages of the app
 PAGES = {
     "Documents": documents_page,
-    "Chat": chat_page
+    "Chat": chat_page,
+    "Webpages": url_indexing_page
     # Add other pages here
 }
 
