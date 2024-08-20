@@ -7,8 +7,9 @@ from webpages import url_indexing_page
 # Define the pages of the app
 PAGES = {
     "Documents": documents_page,
+    "Webpages": url_indexing_page,
     "Chat": chat_page,
-    "Webpages": url_indexing_page
+
     # Add other pages here
 }
 
