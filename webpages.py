@@ -111,6 +111,7 @@ def url_indexing_page():
         for webpage in paginated_urls:
             with st.expander(f"{webpage['webpage_title']} ({webpage['unique_title']})"):
                 st.write(webpage['summary'])
+                st.markdown(f"[Open URL]({webpage['url']})")  # Clickable URL link
 
         # Pagination controls
         col1, col2, col3 = st.columns(3)
