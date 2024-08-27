@@ -21,6 +21,7 @@ def url_indexing_page():
     st.session_state.setdefault('indexed_urls', [])
     st.session_state.setdefault('current_page', 1)
     st.session_state.setdefault('show_results', False)  # Control visibility of results
+    st.session_state.setdefault('refresh_indexed_urls', False)  # For refreshing the indexed URLs
 
     # API details
     enqueue_url = "http://127.0.0.1:5000/api/index_webpage"
@@ -86,11 +87,12 @@ def url_indexing_page():
                 st.info("No URLs were unreachable.")
 
     # Fetch and display indexed URLs with pagination
-    if not st.session_state.indexed_urls:
+    if not st.session_state.indexed_urls or st.session_state.get('refresh_indexed_urls', False):
         try:
             response = requests.get(webpages_url, headers=headers)
             response.raise_for_status()
             st.session_state.indexed_urls = response.json().get('indexed_webpages', [])
+            st.session_state.refresh_indexed_urls = False  # Reset refresh flag
         except requests.exceptions.RequestException as e:
             st.error(f"Failed to fetch indexed webpages: {e}")
 
@@ -98,7 +100,13 @@ def url_indexing_page():
     if st.session_state.indexed_urls:
         st.markdown("<hr style='margin-top: 40px;'>", unsafe_allow_html=True)
         st.subheader("Indexed URLs")
-        
+
+        # Refresh button
+        refresh_clicked = st.button("Refresh")
+        if refresh_clicked:
+            st.session_state.refresh_indexed_urls = True
+            st.rerun()
+
         # Pagination variables
         total_pages = (len(st.session_state.indexed_urls) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE
         current_page = st.session_state.current_page
