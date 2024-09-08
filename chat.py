@@ -87,6 +87,7 @@ def load_indexed_webpages():
         st.error(f"Failed to load indexed webpages: {e}")
         st.session_state['indexed_webpages'] = []
 
+
 def display_related_documents(response_data):
     """Helper function to display related documents."""
     related_docs = response_data.get('relatedDocs', [])
@@ -94,8 +95,10 @@ def display_related_documents(response_data):
         st.subheader("Related Documents")
         for doc in related_docs:
             doc_name = doc.get("filename", "Unknown Document")
-            doc_roles = doc.get("roles", [])
-            display_document_in_chat(doc_name, doc_roles)
+            doc_roles = doc.get("roles", "")
+            # Split the roles string into a list
+            doc_roles_list = doc_roles.split(", ") if doc_roles else []
+            display_document_in_chat(doc_name, doc_roles_list)
 
 def display_related_webpages(response_data):
     """Helper function to display related webpages."""
@@ -104,10 +107,10 @@ def display_related_webpages(response_data):
         st.subheader("Related Webpages")
         for webpage in related_webpages:
             webpage_title = webpage.get("title", "Unknown Webpage")
-            webpage_roles = webpage.get("roles", [])
-            display_webpage_in_chat(webpage_title, webpage_roles)
-    else:
-        st.info("No related webpages found.")
+            webpage_roles = webpage.get("roles", "")
+            # Split the roles string into a list
+            webpage_roles_list = webpage_roles.split(", ") if webpage_roles else []
+            display_webpage_in_chat(webpage_title, webpage_roles_list)
 
 def display_document_in_chat(doc_name, doc_roles):
     """Helper function to display a document with roles in chat."""
@@ -124,6 +127,7 @@ def display_webpage_in_chat(webpage_title, webpage_roles):
     else:
         with st.expander(webpage_title):
             st.write(f"**Roles:** {', '.join(webpage_roles)}")
+
 
 def display_response(response_data):
     """Helper function to display the response from the chat API."""

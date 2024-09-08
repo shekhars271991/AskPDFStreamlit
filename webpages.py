@@ -121,20 +121,18 @@ def url_indexing_page():
                 st.write(webpage['summary'])
                 st.markdown(f"[Open URL]({webpage['url']})")  # Clickable URL link
 
-        # Pagination controls
+        # Pagination controls without rerunning the app
         col1, col2, col3 = st.columns(3)
         with col1:
             if current_page > 1:
-                if st.button("Previous"):
+                if st.button("Previous", key="prev"):
                     st.session_state.current_page -= 1
-                    st.rerun()
         with col2:
             st.write(f"Page {current_page} of {total_pages}")
         with col3:
             if current_page < total_pages:
-                if st.button("Next"):
+                if st.button("Next", key="next"):
                     st.session_state.current_page += 1
-                    st.rerun()
 
     # Reset the results section if the user navigates away or reloads the page
     if not input_url:
