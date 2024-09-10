@@ -107,10 +107,15 @@ def display_related_webpages(response_data):
         st.subheader("Related Webpages")
         for webpage in related_webpages:
             webpage_title = webpage.get("title", "Unknown Webpage")
-            webpage_roles = webpage.get("roles", "")
-            # Split the roles string into a list
-            webpage_roles_list = webpage_roles.split(", ") if webpage_roles else []
-            display_webpage_in_chat(webpage_title, webpage_roles_list)
+            webpage_url = webpage.get("url", "No URL provided")
+            if webpage_title != "Unknown Webpage":
+                with st.expander(webpage_title):
+                    st.markdown(f"[{webpage_url}]({webpage_url})")
+            else:
+                st.write(f"- {webpage_title} (URL: {webpage_url})")
+    else:
+        st.info("No related webpages found.")
+
 
 def display_document_in_chat(doc_name, doc_roles):
     """Helper function to display a document with roles in chat."""
