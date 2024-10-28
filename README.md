@@ -3,6 +3,11 @@ AskPDFStreamlit
 
 AskPDFStreamlit is a Streamlit application designed to help users interact with and query PDF documents using natural language processing and AI capabilities. The app allows users to upload PDF files, ask questions about the content, and receive accurate responses based on the document's contents. It leverages various AI tools and integrations to provide an interactive document management experience.
 
+Backend
+--------
+
+Backend of this app can be found at: https://github.com/shekhars271991/AskPDFApp
+
 Features
 --------
 
